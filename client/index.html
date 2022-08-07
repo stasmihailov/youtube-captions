@@ -1,0 +1,78 @@
+<div id="controls">
+    <input type="text" id="input">
+    <button id="btn" onclick="exec()">
+        Get captions!
+    </button>
+</div>
+
+<div id="output-container">
+    <textarea id="output" rows="15"></textarea>
+</div>
+
+<script>
+  const exec = () => {
+    const url = document.getElementById('input').value;
+    const encodedUrl = encodeURIComponent(url);
+
+    fetch(`http://localhost:3000/captions?url=${encodedUrl}`)
+      .then(resp => resp.text())
+      .then(text => {
+        document.getElementById('output').innerText = text;
+      });
+  }
+</script>
+
+<style>
+    #controls, #output-container {
+        margin: auto;
+        width: 50%;
+    }
+
+    #controls {
+        margin-top: 100px;
+        margin-bottom: 30px;
+        height: 26px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #input {
+        height: inherit;
+        border: thin solid #ccc;
+        border-radius: 3px;
+        width: 100%;
+
+        margin-right: 10px;
+    }
+
+    #btn {
+        display: flex;
+        justify-content: center;
+        align-content: center;
+        flex-direction: column;
+
+        height: inherit;
+        border: thin solid #acf;
+        border-radius: 3px;
+        text-align: center;
+        padding: 0 12px;
+        white-space: nowrap;
+
+        box-shadow: 0 2px 5px -1px grey;
+        background-color: #acf;
+    }
+
+    #btn:hover {
+        cursor: pointer;
+    }
+
+    #btn:active {
+        box-shadow: 0 2px 5px -1px grey inset;
+    }
+
+    #output {
+        width: 100%;
+    }
+</style>
