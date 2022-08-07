@@ -28,7 +28,11 @@ const getDataScript = async (videoLink) => {
 }
 
 const getCaptionsUrl = data => {
-  return data.captions.playerCaptionsTracklistRenderer.captionTracks[0].baseUrl;
+  try {
+    return data.captions.playerCaptionsTracklistRenderer.captionTracks[0].baseUrl;
+  } catch (e) {
+    return null;
+  }
 };
 
 const getCaptionsText = ($) => {
@@ -39,6 +43,10 @@ const getCaptionsText = ($) => {
 }
 
 const pullCaptions = async (url) => {
+  if (!url) {
+    return 'no auto-generated captions for this video ☹️';
+  }
+
   return await rp(url)
     .then(html => cheerio.load(html))
     .then(getCaptionsText);
