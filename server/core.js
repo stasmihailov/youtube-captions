@@ -44,7 +44,7 @@ const getCaptionsText = ($) => {
 
 const pullCaptions = async (url) => {
   if (!url) {
-    return 'no auto-generated captions for this video ☹️';
+    return null;
   }
 
   return await rp(url)

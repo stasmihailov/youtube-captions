@@ -14,13 +14,17 @@ app.get('/captions', async (req, res) => {
 
   const captions = await core.getCaptions(url);
 
-  res.send(captions);
+  if (!captions) {
+    res.status(404).send('No captions found for this video ☹️');
+  } else {
+    res.status(200).send(captions);
+  }
 })
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
 
-process.on('uncaughtException', function(err) {
+process.on('uncaughtException', function (err) {
   console.log(err);
 })

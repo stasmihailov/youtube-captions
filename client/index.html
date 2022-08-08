@@ -1,5 +1,5 @@
 <div id="controls">
-    <input type="text" id="input">
+    <input type="text" id="input" oninput="input.onChange()">
     <button id="btn" onclick="exec()">
         Get captions!
     </button>
@@ -10,15 +10,56 @@
 </div>
 
 <script>
+  const youtubeRegex = /^https:\/\/www.youtube.com\/watch\?v=[A-Za-z0-9_-]+$/;
+
+  const getInput = () => document.getElementById('input');
+  const errorClass = 'has-error';
+
+  const input = {
+    onChange: () => {
+      if (getInput().classList.contains(errorClass)) {
+        getInput().classList.remove(errorClass);
+      }
+    },
+    onError: () => {
+      if (!getInput().classList.contains(errorClass)) {
+        getInput().classList.add(errorClass);
+      }
+    },
+  }
+
+  const loader = {
+    show: () => {
+      document.getElementById('btn').disabled = true;
+      document.getElementById('btn').innerText = 'Loading...';
+    },
+    hide: () => {
+      document.getElementById('btn').disabled = false;
+      document.getElementById('btn').innerText = 'Get captions!';
+    }
+  }
+
+  const setText = (text) => {
+    document.getElementById('output').value = text;
+  }
+
   const exec = () => {
+    loader.show();
+
     const url = document.getElementById('input').value;
+    if (!youtubeRegex.test(url)) {
+      setText('Invalid URL');
+      input.onError();
+      loader.hide();
+      return;
+    }
+
     const encodedUrl = encodeURIComponent(url);
 
     fetch(`http://localhost:3000/captions?url=${encodedUrl}`)
       .then(resp => resp.text())
-      .then(text => {
-        document.getElementById('output').innerText = text;
-      });
+      .then(setText)
+      .then(() => loader.hide());
   }
 </script>
 
@@ -47,18 +88,19 @@
         margin-right: 10px;
     }
 
-    #btn {
-        display: flex;
-        justify-content: center;
-        align-content: center;
-        flex-direction: column;
+    #input.has-error {
+        border: thin solid red;
+        color: red;
+    }
 
+    #btn {
         height: inherit;
+        width: 120px;
         border: thin solid #acf;
         border-radius: 3px;
         text-align: center;
-        padding: 0 12px;
         white-space: nowrap;
+
 
         box-shadow: 0 2px 5px -1px grey;
         background-color: #acf;
