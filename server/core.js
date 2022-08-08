@@ -27,10 +27,15 @@ const getDataScript = async (videoLink) => {
     .then($ => findDataScript($('script'), $));
 }
 
-const getCaptionsUrl = data => {
+const getJsonData = data => {
   try {
-    return data.captions.playerCaptionsTracklistRenderer.captionTracks[0].baseUrl;
+    return {
+      title: data.videoDetails.title,
+      captionsUrl: data.captions.playerCaptionsTracklistRenderer.captionTracks[0].baseUrl
+    };
   } catch (e) {
+    console.log(e);
+
     return null;
   }
 };
@@ -42,20 +47,24 @@ const getCaptionsText = ($) => {
     .join(' ');
 }
 
-const pullCaptions = async (url) => {
-  if (!url) {
+const pullCaptions = async (data) => {
+  if (!data) {
     return null;
   }
 
-  return await rp(url)
+  const {title, captionsUrl} = data;
+
+  const captions = await rp(captionsUrl)
     .then(html => cheerio.load(html))
     .then(getCaptionsText);
+
+  return {title, captions};
 }
 
 const getCaptions = async (url) => {
   return await getDataScript(url)
     .then(JSON.parse)
-    .then(getCaptionsUrl)
+    .then(getJsonData)
     .then(pullCaptions);
 }
 

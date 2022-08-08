@@ -1,29 +1,96 @@
 <div id="controls">
-    <input type="text" id="input" oninput="input.onChange()">
-    <button id="btn" onclick="exec()">
+    <input type="text" id="input" oninput="input.onChange()" onmousedown="input.onChange()">
+    <button class="button" id="btn" disabled onclick="button.onClick()">
         Get captions!
     </button>
 </div>
 
+<div id="video-title" class="hidden">
+    <div id="video-title-icon"></div>
+    <div id="video-title-text"></div>
+</div>
+
 <div id="output-container">
-    <textarea id="output" rows="15"></textarea>
+    <textarea id="output" rows="15" readonly placeholder="Captions will show up here."></textarea>
+    <button class="button" id="output-copy-btn" onclick="copyToClipboard()">
+        <div id="output-copy-btn-img"></div>
+    </button>
 </div>
 
 <script>
   const youtubeRegex = /^https:\/\/www.youtube.com\/watch\?v=[A-Za-z0-9_-]+$/;
 
-  const getInput = () => document.getElementById('input');
-  const errorClass = 'has-error';
+  const defaultClasses = {
+    error: 'has-error',
+    hidden: 'hidden',
+  }
 
   const input = {
+    getElement: () => document.getElementById('input'),
     onChange: () => {
-      if (getInput().classList.contains(errorClass)) {
-        getInput().classList.remove(errorClass);
+      if (input.getElement().classList.contains(defaultClasses.error)) {
+        input.getElement().classList.remove(defaultClasses.error);
+      }
+
+      const url = input.getElement().value;
+      if (!youtubeRegex.test(url)) {
+        button.disable();
+      } else {
+        button.enable();
       }
     },
     onError: () => {
-      if (!getInput().classList.contains(errorClass)) {
-        getInput().classList.add(errorClass);
+      if (!input.getElement().classList.contains(defaultClasses.error)) {
+        input.getElement().classList.add(defaultClasses.error);
+      }
+    },
+  }
+
+  const button = {
+    getElement: () => document.getElementById('btn'),
+    enabled: () => button.getElement().disabled === false,
+    onClick: () => {
+      if (!button.enabled()) {
+        return;
+      }
+
+      videoTitle.hide();
+      loader.show();
+
+      const url = input.getElement().value;
+      if (!youtubeRegex.test(url)) {
+        setText('Invalid URL');
+        input.onError();
+        loader.hide();
+        return;
+      }
+
+      const encodedUrl = encodeURIComponent(url);
+
+      fetch(`http://localhost:3000/captions?url=${encodedUrl}`)
+        .then(resp => resp.json())
+        .then(setText)
+        .then(() => videoTitle.show())
+        .then(() => loader.hide());
+    },
+    enable: () => button.getElement().disabled = false,
+    disable: () => button.getElement().disabled = true,
+  }
+
+  const videoTitle = {
+    getElement: () => document.getElementById('video-title'),
+    getTitleElement: () => document.getElementById('video-title-text'),
+    set: (text) => videoTitle.getTitleElement().innerText = text,
+    hide: () => {
+      const classes = videoTitle.getElement().classList;
+      if (!classes.contains(defaultClasses.hidden)) {
+        classes.add(defaultClasses.hidden);
+      }
+    },
+    show: () => {
+      const classes = videoTitle.getElement().classList;
+      if (classes.contains(defaultClasses.hidden)) {
+        classes.remove(defaultClasses.hidden);
       }
     },
   }
@@ -39,40 +106,46 @@
     }
   }
 
-  const setText = (text) => {
-    document.getElementById('output').value = text;
+  const setText = (data) => {
+    const {title, captions} = data;
+
+    videoTitle.set(title);
+    document.getElementById('output').value = captions;
   }
 
-  const exec = () => {
-    loader.show();
+  const copyToClipboard = () => {
+    const textarea = document.getElementById('output');
 
-    const url = document.getElementById('input').value;
-    if (!youtubeRegex.test(url)) {
-      setText('Invalid URL');
-      input.onError();
-      loader.hide();
-      return;
-    }
-
-    const encodedUrl = encodeURIComponent(url);
-
-    fetch(`http://localhost:3000/captions?url=${encodedUrl}`)
-      .then(resp => resp.text())
-      .then(setText)
-      .then(() => loader.hide());
+    textarea.select();
+    textarea.setSelectionRange(0, 99999); /* For mobile devices */
+    navigator.clipboard.writeText(textarea.value);
   }
 </script>
 
 <style>
-    #controls, #output-container {
+    #controls, #output-container, #video-title {
         margin: auto;
         width: 80%;
+    }
+
+    #controls, #output-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    #video-title {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
     }
 
     #controls {
         margin-top: 100px;
         margin-bottom: 30px;
-        height: 26px;
+        height: 44px;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -81,11 +154,17 @@
 
     #input {
         height: inherit;
-        border: thin solid #ccc;
+        border: thin solid white;
         border-radius: 3px;
         width: 100%;
 
-        margin-right: 10px;
+        margin-right: 20px;
+        padding: 0 12px;
+    }
+
+    #input:focus {
+        outline: none;
+        box-shadow: 0 0 3px 2px #acf;
     }
 
     #input.has-error {
@@ -95,15 +174,14 @@
 
     #btn {
         height: inherit;
-        width: 120px;
+        width: 240px;
+
+        background-color: #acf;
         border: thin solid #acf;
+
         border-radius: 3px;
         text-align: center;
         white-space: nowrap;
-
-
-        box-shadow: 0 2px 5px -1px grey;
-        background-color: #acf;
     }
 
     #btn:hover {
@@ -115,6 +193,74 @@
     }
 
     #output {
+        padding: 8px 12px;
+        resize: none;
         width: 100%;
+        border: thin solid #ccc;
+        border-radius: 3px;
+    }
+
+    #output:focus {
+        outline: none;
+    }
+
+    #output-copy-btn {
+        width: 44px;
+        height: 44px;
+        border: thin solid #eaf;
+        border-radius: 3px;
+        margin-left: 20px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background-color: #eaf;
+    }
+
+    #output-copy-btn:hover {
+        cursor: pointer;
+    }
+
+    #output-copy-btn:active {
+        box-shadow: 0 2px 5px -1px grey inset;
+    }
+
+    #output-copy-btn-img {
+        width: 70%;
+        height: 70%;
+        background: url("img/clipboard.png") no-repeat center center;
+        background-size: contain;
+    }
+
+    #btn:disabled {
+        background-color: #ddd;
+        border: thin solid #ddd;
+    }
+
+    #btn:disabled:hover {
+        cursor: unset;
+    }
+
+    #input, #btn, #output-copy-btn, #btn:disabled:active {
+        font-size: 1.1em;
+        box-shadow: 0 2px 5px -1px grey;
+    }
+
+    #video-title-icon {
+        background: url("img/youtube.ico") no-repeat center center;
+        background-size: contain;
+
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    * {
+        font-family: arial, sans-serif;
     }
 </style>

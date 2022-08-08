@@ -12,12 +12,16 @@ app.use(cors({
 app.get('/captions', async (req, res) => {
   const url = req.query.url;
 
-  const captions = await core.getCaptions(url);
+  const data = await core.getCaptions(url);
+  const {title, captions} = data;
 
   if (!captions) {
-    res.status(404).send('No captions found for this video ☹️');
+    res.status(404).send({
+      title,
+      captions: 'No captions found for this video ☹️'
+    });
   } else {
-    res.status(200).send(captions);
+    res.status(200).send(data);
   }
 })
 
