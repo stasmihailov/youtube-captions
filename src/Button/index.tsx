@@ -18,9 +18,17 @@ const SButton = styled('div')`
   ${styles.align.center};
   width: 160px;
 
+  cursor: pointer;
+
+  ${styles.noSelect};
+
   background-color: #1aafaf;
   color: ${styles.textColor.buttonActive};
   size: ${styles.textSize.s16};
+
+  :active {
+    background-color: #158383;
+  }
 `;
 
 const SButtonDisabled = styled(SButton)`

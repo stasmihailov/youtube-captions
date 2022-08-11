@@ -36,6 +36,8 @@ const SYoutubeIcon = styled('div')`
 
 const SYoutubeTitle = styled('span')`
   font-size: ${styles.textSize.s12};
+  white-space: nowrap;
+  text-overflow: ellipsis;
 `;
 
 const SCaptions = styled('div')`
@@ -52,6 +54,10 @@ const SCaptions = styled('div')`
 
 const SPlaceholder = styled(SVideoCommon)`
   ${styles.align.center};
+  
+  width: 400px;
+  border: 0px;
+  border-radius: 3px;
 
   font-size: ${styles.textSize.s12};
   color: ${styles.textColor.placeholder};
