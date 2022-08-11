@@ -6,11 +6,11 @@ const BrowserWindow = electron.BrowserWindow;
 
 const createWindow = () => {
   const win = new BrowserWindow({
-    width: 800,
-    height: 600
+    width: 640,
+    height: 200
   })
 
-  win.loadFile(__dirname + '/client/index.html')
+  win.loadURL(`file://${__dirname}/public/index.html`)
 }
 
 let serverProcess;

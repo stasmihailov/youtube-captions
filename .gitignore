@@ -1,3 +1,8 @@
+# intellij idea
 .idea
-node_modules
 *.iml
+
+# project
+node_modules
+build
+public/dist
