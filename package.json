@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "build": "webpack",
-    "start": "electron ."
+    "start": "electron .",
+    "app:dir": "electron-builder --dir",
+    "app:dist": "electron-builder"
   },
   "main": "electron.js",
   "dependencies": {
@@ -17,7 +19,6 @@
     "node-fetch": "2.6.7",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-scripts": "5.0.1",
     "request-promise": "4.2.6",
     "styled-components": "5.3.5",
     "ts-loader": "9.3.1",
@@ -25,8 +26,19 @@
   },
   "devDependencies": {
     "electron": "20.0.1",
+    "electron-builder": "23.3.3",
     "webpack": "5.74.0",
     "webpack-cli": "^4.10.0"
+  },
+  "build": {
+    "appId": "com.denisjpeg.youtubecc",
+    "mac": {
+      "category": "public.app-category.utilities"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ]
   },
   "browserslist": {
     "production": [
