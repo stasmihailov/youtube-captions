@@ -2,7 +2,7 @@ import * as React from 'react';
 import styled from "styled-components";
 import {Input} from "../Input";
 import {Button, IButtonState} from "../Button";
-import {Video} from "../Video";
+import {IVideoCaptionsState, Video} from "../Video";
 import {useCallback, useEffect, useMemo, useState} from "react";
 
 const SHeader = styled('div')`
@@ -38,13 +38,22 @@ const SContainer = styled('div')`
 `;
 
 type ServerResp = {
+  status: 'NO_CAPTIONS',
+} | {
+  status: 'OK',
   title: string;
   captions: string;
 };
 
 const getCaptions = async (url: string): Promise<ServerResp> => {
   return fetch(`http://localhost:3000/captions?url=${url}`)
-    .then(resp => resp.json());
+    .then(resp => {
+      if (resp.status !== 200) {
+        return {stasus: 'NO_CAPTIONS'};
+      }
+
+      return resp.json().then(data => ({status: 'OK', ...data}));
+    });
 };
 
 export const App = () => {
@@ -54,13 +63,14 @@ export const App = () => {
   const [captions, setCaptions] = useState('');
 
   const [buttonState, setButtonState] = useState(IButtonState.INITIAL);
-
-  const mIsVideoLoaded = useMemo(() => !!title, [title]);
+  const [captionsState, setCaptionsState] = useState(IVideoCaptionsState.INITIAL);
 
   const cbVideoReset = useCallback(() => {
     setTitle('');
     setCaptions('');
-  }, [title, captions]);
+    setCaptionsState(IVideoCaptionsState.INITIAL);
+    setButtonState(IButtonState.INITIAL);
+  }, [title, captions, buttonState]);
 
   const cbOnChangeInput = useCallback((isY: boolean, text: string) => {
     setIsYoutube(isY);
@@ -76,9 +86,17 @@ export const App = () => {
 
     getCaptions(encodedUrl)
       .then((resp: ServerResp) => {
-        setTitle(resp.title);
-        setCaptions(resp.captions);
-        setButtonState(IButtonState.LOADED);
+        if (resp.status === 'OK') {
+          setTitle(resp.title);
+          setCaptions(resp.captions);
+          setCaptionsState(IVideoCaptionsState.LOADED);
+          setButtonState(IButtonState.LOADED);
+        } else {
+          setTitle('');
+          setCaptions('');
+          setCaptionsState(IVideoCaptionsState.NOT_AVAILABLE);
+          setButtonState(IButtonState.INITIAL);
+        }
       });
   }, [url]);
 
@@ -94,9 +112,9 @@ export const App = () => {
           <Button state={buttonState} onCopy={cbOnCopy}/>
         </SHeader>
         <Video
-          loaded={mIsVideoLoaded}
           title={title}
           captions={captions}
+          captionsState={captionsState}
         />
       </SContainer>
     </SApp>

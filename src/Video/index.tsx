@@ -42,10 +42,10 @@ const SYoutubeTitle = styled('span')`
 
 const SCaptions = styled('div')`
   font-size: ${styles.textSize.s12};
-  
+
   width: 374px;
   height: 42px;
-  
+
   border-radius: 3px;
   border: thin solid #bbb;
   padding: 6px 12px;
@@ -54,9 +54,9 @@ const SCaptions = styled('div')`
 
 const SPlaceholder = styled(SVideoCommon)`
   ${styles.align.center};
-  
+
   width: 400px;
-  border: 0px;
+  border: 0;
   border-radius: 3px;
 
   font-size: ${styles.textSize.s12};
@@ -64,18 +64,28 @@ const SPlaceholder = styled(SVideoCommon)`
   background-color: #eee;
 `;
 
+export enum IVideoCaptionsState {
+  INITIAL,
+  NOT_AVAILABLE,
+  LOADED,
+}
+
 export interface IVideoProps {
-  loaded: boolean;
   title?: string;
   captions?: string;
+  captionsState: IVideoCaptionsState;
 }
 
 export const Video = (props: IVideoProps) => {
-  const {captions, loaded, title} = props;
+  const {captions, captionsState, title} = props;
 
-  if (!loaded) {
+  if (captionsState === IVideoCaptionsState.INITIAL) {
     return <SPlaceholder>
       Captions will show up here...
+    </SPlaceholder>;
+  } else if (captionsState === IVideoCaptionsState.NOT_AVAILABLE) {
+    return <SPlaceholder>
+      Captions are not available for this video.
     </SPlaceholder>;
   }
 
