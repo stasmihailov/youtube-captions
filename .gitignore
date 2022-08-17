@@ -7,6 +7,5 @@
 node_modules
 ## webpack
 public/dist
-build
 ## electron
 dist

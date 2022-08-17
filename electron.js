@@ -7,7 +7,11 @@ const BrowserWindow = electron.BrowserWindow;
 const createWindow = () => {
   const win = new BrowserWindow({
     width: 640,
-    height: 200
+    height: 210,
+    title: "YouTube Captions",
+    frame: false,
+    resizable: false,
+    transparent: true,
   })
 
   win.loadURL(`file://${__dirname}/public/index.html`)
@@ -21,6 +25,8 @@ app.whenReady().then(() => {
 })
 
 app.on('window-all-closed', () => {
-  serverProcess.kill();
-  app.quit();
+  if (process.platform !== 'darwin') {
+    serverProcess.kill();
+    app.quit();
+  }
 })

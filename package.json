@@ -4,8 +4,7 @@
   "scripts": {
     "build": "webpack",
     "start": "electron .",
-    "app:dir": "electron-builder --dir",
-    "app:dist": "electron-builder"
+    "package": "electron-packager . 'YouTube Captions' --platform=darwin --asar --arch=x64 --overwrite --icon=./assets/icon.png --out=dist"
   },
   "main": "electron.js",
   "dependencies": {
@@ -26,7 +25,7 @@
   },
   "devDependencies": {
     "electron": "20.0.1",
-    "electron-builder": "23.3.3",
+    "electron-packager": "15.5.1",
     "webpack": "5.74.0",
     "webpack-cli": "^4.10.0"
   },
