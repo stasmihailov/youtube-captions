@@ -9,9 +9,7 @@ const createWindow = () => {
     width: 640,
     height: 210,
     title: "YouTube Captions",
-    frame: false,
     resizable: false,
-    transparent: true,
   })
 
   win.loadURL(`file://${__dirname}/public/index.html`)
