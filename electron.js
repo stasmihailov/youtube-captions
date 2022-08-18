@@ -35,3 +35,10 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 })
+
+app.on('before-quit', () => {
+  if (process.platform === 'darwin') {
+    serverProcess.kill();
+    app.quit();
+  }
+})
